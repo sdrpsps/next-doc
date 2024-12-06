@@ -2,6 +2,8 @@
 
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import TextStyle from "@tiptap/extension-text-style";
+import FontFamily from '@tiptap/extension-font-family'
 import Underline from "@tiptap/extension-underline";
 import Table from "@tiptap/extension-table";
 import TableCell from "@tiptap/extension-table-cell";
@@ -51,6 +53,8 @@ export const Editor = () => {
     },
     extensions: [
       StarterKit,
+      TextStyle,
+      FontFamily,
       Underline,
       TaskList,
       TaskItem.configure({

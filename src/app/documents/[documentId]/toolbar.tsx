@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { useEditorStore } from "@/store/use-editor-store";
 import {
   BoldIcon,
+  ChevronDownIcon,
   ItalicIcon,
   ListTodoIcon,
   LucideIcon,
@@ -16,6 +17,116 @@ import {
   UnderlineIcon,
   Undo2Icon,
 } from "lucide-react";
+import { type Level } from "@tiptap/extension-heading";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+const HeadingButton = () => {
+  const { editor } = useEditorStore();
+
+  const headings = [
+    { label: "Normal Text", value: 0, className: "text-base" }, // 16px
+    { label: "Heading 1", value: 1, className: "text-2xl" }, // 24px
+    { label: "Heading 2", value: 2, className: "text-xl" }, // 20px
+    { label: "Heading 3", value: 3, className: "text-lg" }, // 18px
+    { label: "Heading 4", value: 4, className: "text-base" }, // 16px
+    { label: "Heading 5", value: 5, className: "text-sm" }, // 14px
+    { label: "Heading 6", value: 6, className: "text-xs" }, // 12px
+  ];
+
+  const getCurrentHeading = () => {
+    const activeHeading = Array.from({ length: 6 }, (_, i) => i + 1).find(
+      (level) => editor?.isActive("heading", { level })
+    );
+    return activeHeading ? `Heading ${activeHeading}` : "Normal Text";
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className="h-7 min-w-7 shrink-0 flex items-center justify-center rounded-sm hover:bg-neutral-200/80 px-1.5 overflow-hidden text-sm">
+          <span className="truncate">{getCurrentHeading()}</span>
+          <ChevronDownIcon className="ml-2 size-4 shrink-0" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="p-1 flex flex-col gap-y-1">
+        {headings.map(({ label, value, className }) => (
+          <DropdownMenuItem
+            key={value}
+            className={cn(
+              "flex items-center gap-x-2 px-2 py-1 rounded-sm hover:bg-neutral-200/80",
+              className,
+              (value === 0 && !editor?.isActive("heading")) ||
+                (editor?.isActive("heading", { level: value }) &&
+                  "bg-neutral-200/80")
+            )}
+            onClick={() => {
+              if (value === 0) {
+                editor?.chain().focus().setParagraph().run();
+              } else {
+                editor
+                  ?.chain()
+                  .focus()
+                  .toggleHeading({ level: value as Level })
+                  .run();
+              }
+            }}
+          >
+            {label}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
+const FontFamilyButton = () => {
+  const { editor } = useEditorStore();
+
+  const fonts = [
+    { label: "Arial", value: "Arial" },
+    { label: "Times New Roman", value: "Times New Roman" },
+    { label: "Comic Sans MS", value: "Comic Sans MS" },
+    { label: "Courier New", value: "Courier New" },
+    { label: "Georgia", value: "Georgia" },
+    { label: "Helvetica", value: "Helvetica" },
+    { label: "Impact", value: "Impact" },
+  ];
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className="h-7 w-[120px] shrink-0 flex items-center justify-between rounded-sm hover:bg-neutral-200/80 px-1.5 overflow-hidden text-sm">
+          <span className="truncate">
+            {editor?.getAttributes("textStyle").fontFamily || "Arial"}
+          </span>
+          <ChevronDownIcon className="ml-2 size-4 shrink-0" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="p-1 flex flex-col gap-y-1">
+        {fonts.map(({ label, value }) => (
+          <DropdownMenuItem
+            key={value}
+            className={cn(
+              "flex items-center gap-x-2 px-2 py-1 rounded-sm hover:bg-neutral-200/80",
+              editor?.getAttributes("textStyle").fontFamily === value &&
+                "bg-neutral-200/80"
+            )}
+            style={{ fontFamily: value }}
+            onClick={() => editor?.chain().focus().setFontFamily(value).run()}
+          >
+            {label}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
 
 interface ToolbarButtonProps {
   onClick?: () => void;
@@ -125,9 +236,9 @@ export const Toolbar = () => {
         <ToolbarButton key={section.label} {...section} />
       ))}
       <Separator orientation="vertical" className="h-6 bg-neutral-300" />
-      {/* TODO: Font Family */}
+      <FontFamilyButton />
       <Separator orientation="vertical" className="h-6 bg-neutral-300" />
-      {/* TODO: Heading */}
+      <HeadingButton />
       <Separator orientation="vertical" className="h-6 bg-neutral-300" />
       {/* TODO: Font Size */}
       <Separator orientation="vertical" className="h-6 bg-neutral-300" />
