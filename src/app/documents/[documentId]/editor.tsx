@@ -4,6 +4,7 @@ import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import { Color } from "@tiptap/extension-color";
+import TextAlign from "@tiptap/extension-text-align";
 import TextStyle from "@tiptap/extension-text-style";
 import FontFamily from "@tiptap/extension-font-family";
 import Highlight from "@tiptap/extension-highlight";
@@ -62,6 +63,9 @@ export const Editor = () => {
         defaultProtocol: "https",
       }),
       Color,
+      TextAlign.configure({
+        types: ["heading", "paragraph"],
+      }),
       TextStyle,
       FontFamily,
       Highlight.configure({ multicolor: true }),
