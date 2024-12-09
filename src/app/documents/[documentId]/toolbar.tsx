@@ -27,6 +27,8 @@ import {
   AlignJustifyIcon,
   ListIcon,
   ListOrderedIcon,
+  MinusIcon,
+  PlusIcon,
 } from "lucide-react";
 import { type Level } from "@tiptap/extension-heading";
 
@@ -49,6 +51,77 @@ import { SketchPicker, ColorResult } from "react-color";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+
+const FontSizeButton = () => {
+  const { editor } = useEditorStore();
+
+  const currentFontSize = editor?.getAttributes("textStyle").fontSize
+    ? editor?.getAttributes("textStyle").fontSize.replace("px", "")
+    : "16";
+
+  const [inputValue, setInputValue] = useState(currentFontSize);
+
+  const updateFontSize = (newFontSize: string) => {
+    const size = parseInt(newFontSize);
+    if (!isNaN(size) && size > 0) {
+      editor?.chain().focus().setFontSize(`${size}px`).run();
+      setInputValue(size);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
+  };
+
+  const handleInputBlur = () => {
+    updateFontSize(inputValue);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      updateFontSize(inputValue);
+      editor?.commands.focus();
+    }
+  };
+
+  const increase = () => {
+    const newSize = parseInt(currentFontSize) + 1;
+    updateFontSize(`${newSize}px`);
+  };
+
+  const decrease = () => {
+    const newSize = parseInt(currentFontSize) - 1;
+    if (newSize > 0) {
+      updateFontSize(`${newSize}px`);
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-x-0.5">
+      <button
+        className="h-7 w-7 shrink-0 flex items-center justify-center rounded-sm hover:bg-neutral-200/80"
+        onClick={decrease}
+      >
+        <MinusIcon className="size-4" />
+      </button>
+      <input
+        className="h-7 w-10 text-sm text-center border border-neutral-400 rounded-sm bg-transparent focus:outline-none focus:ring-0"
+        type="text"
+        value={inputValue}
+        onChange={handleInputChange}
+        onBlur={handleInputBlur}
+        onKeyDown={handleKeyDown}
+      />
+      <button
+        className="h-7 w-7 shrink-0 flex items-center justify-center rounded-sm hover:bg-neutral-200/80"
+        onClick={increase}
+      >
+        <PlusIcon className="size-4" />
+      </button>
+    </div>
+  );
+};
 
 const ListButton = () => {
   const { editor } = useEditorStore();
@@ -518,7 +591,7 @@ export const Toolbar = () => {
       <Separator orientation="vertical" className="h-6 bg-neutral-300" />
       <HeadingButton />
       <Separator orientation="vertical" className="h-6 bg-neutral-300" />
-      {/* TODO: Font Size */}
+      <FontSizeButton />
       <Separator orientation="vertical" className="h-6 bg-neutral-300" />
       {sections[1].map((section) => (
         <ToolbarButton key={section.label} {...section} />
