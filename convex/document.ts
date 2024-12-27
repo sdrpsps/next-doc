@@ -71,7 +71,7 @@ export const create = mutation({
     return await ctx.db.insert("document", {
       title: args.title ?? "Untitled Document",
       ownerId: user.subject,
-      organizationId,
+      organizationId: organizationId ?? undefined,
       initialContent: args.initialContent,
     });
   },
@@ -120,8 +120,8 @@ export const updateTitleById = mutation({
     }
 
     const isOwner = document.ownerId === user.subject;
-   const isOrganizationMember = document.organizationId === user.organization_id;
-
+    const isOrganizationMember =
+      document.organizationId === user.organization_id;
 
     if (!isOwner && !isOrganizationMember) {
       throw new ConvexError("Unauthorized");
