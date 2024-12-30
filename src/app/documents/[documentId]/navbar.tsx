@@ -39,9 +39,30 @@ import { useEditorStore } from "@/store/use-editor-store";
 import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
 import { Avatars } from "./avatars";
 import { Inbox } from "./inbox";
+import { Doc } from "../../../../convex/_generated/dataModel";
+import { useRouter } from "next/navigation";
+import { useMutation } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
+import { toast } from "sonner";
 
-export const Navbar = () => {
+interface NavbarProps {
+  data: Doc<"document">;
+}
+
+export const Navbar = ({ data }: NavbarProps) => {
+  const router = useRouter();
   const { editor } = useEditorStore();
+
+  const mutation = useMutation(api.document.create);
+
+  const createDocument = () => {
+    mutation({ title: "Untitled Document", initialContent: "" })
+      .then((id) => {
+        toast.success("Document created");
+        router.push(`/documents/${id}`);
+      })
+      .catch(() => toast.error("Something went wrong"));
+  };
 
   const insertTable = ({ rows, cols }: { rows: number; cols: number }) => {
     editor
@@ -65,7 +86,7 @@ export const Navbar = () => {
     const blob = new Blob([JSON.stringify(content)], {
       type: "application/json",
     });
-    onDownload(blob, "document.json"); // TODO: change file name
+    onDownload(blob, `${data.title}.json`);
   };
 
   const onSaveHTML = () => {
@@ -73,7 +94,7 @@ export const Navbar = () => {
 
     const content = editor.getHTML();
     const blob = new Blob([content], { type: "text/html" });
-    onDownload(blob, "document.html"); // TODO: change file name
+    onDownload(blob, `${data.title}.html`);
   };
 
   const onSaveText = () => {
@@ -81,7 +102,7 @@ export const Navbar = () => {
 
     const content = editor.getText();
     const blob = new Blob([content], { type: "text/plain" });
-    onDownload(blob, "document.txt"); // TODO: change file name
+    onDownload(blob, `${data.title}.txt`);
   };
 
   return (
@@ -97,7 +118,7 @@ export const Navbar = () => {
           ></Image>
         </Link>
         <div className="flex flex-col">
-          <DocumentInput />
+          <DocumentInput title={data.title} id={data._id} />
           <div className="flex">
             <Menubar className="border-none bg-transparent shadow-none h-auto p-0">
               <MenubarMenu>
@@ -129,7 +150,7 @@ export const Navbar = () => {
                       </MenubarItem>
                     </MenubarSubContent>
                   </MenubarSub>
-                  <MenubarItem>
+                  <MenubarItem onClick={createDocument}>
                     <FilePlusIcon className="mr-2 size-4" />
                     New Document
                   </MenubarItem>
