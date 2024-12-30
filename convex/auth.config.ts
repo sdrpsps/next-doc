@@ -1,7 +1,7 @@
 export default {
   providers: [
     {
-      domain: "https://workable-sheepdog-96.clerk.accounts.dev",
+      domain: process.env.CONVEX_ISSUER_URL,
       applicationID: "convex",
     },
   ]
